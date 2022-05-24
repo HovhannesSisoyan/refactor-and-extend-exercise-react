@@ -1,71 +1,51 @@
-import React, { Component } from "react";
+import { useState } from "react";
 
-class App extends Component {
-  state = { state: '', year: '', isValid: undefined }
+const validationCredentials = {
+  "new york": { years: [[1917, 1997]] },
+  "california": { years: [[1998, 2006], [1900, 1910]] },
+}
 
-  isValidHome = (home) => {
-    if (isNaN(home.year)) { return false; }
+function App() {
+  const [year, setYear] = useState('');
+  const [state, setState] = useState('');
+  const [isValid, setIsValid] = useState();
 
-    if (home.year.length !== 2 && home.year.length !== 4) { return false; }
+  const isValidHome = ({ state, year }) => {
 
-    if (home.state.toLowerCase() === "new york") {
-      if (home.year.length === 2) {
-        if (parseInt(home.year) < 97 && parseInt(home.year) > 17) {
-          return false;
-        } else {
-          return true;
-        }
-      } else if (home.year.length === 4) {
-        if (parseInt(home.year) < 1997) {
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        return false;
-      }
-    } else if (home.state.toLowerCase() === "california") {
-      if (home.year.length === 2) {
-        if (parseInt(home.year) >= 6 && parseInt(home.year) <= 18) {
-          return false;
-        } else if (parseInt(home.year) <= 98) {
-          return false;
-        } else {
-          return true;
-        }
-      } else if (home.year.length === 4) {
-        if (parseInt(home.year) >= 2006) {
-          return false;
-        } else if (parseInt(home.year) <= 1998) {
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        return false;
-      }
-    } else {
+    if (isNaN(year)) {
       return false;
     }
+
+    const validState = validationCredentials[state];
+
+    if (validState) {
+      const { years } = validState;
+      const yearInt = parseInt(year);
+
+      const isYearInInterval = years.some(([from, to]) => (yearInt >= from && yearInt <= to) ? true : false);
+
+      if (isYearInInterval) {
+        return true;
+      }
+    }
+    return false;
   };
 
-  render() {
     return (
       <div className="App">
         <h2>Home Approval System</h2>
-        <h3>Current status: {this.state.isValid ? "Approved Home" : "Unapproved"}</h3>
+        <h3>Current status: {isValid ? "Approved Home" : "Unapproved"}</h3>
         <span>Please enter your home information below.</span>
         <br />
         <label>State:</label>
-        <input type="text" name="state" onChange={(event) => this.setState({ ...this.state, state: event.target.value })} />
+        <input type="text" name="state" onChange={({ target: { value } }) => setState(value)} />
         <br />
         <label>Year:</label>
-        <input type="text" name="year" onChange={(event) => this.setState({ ...this.state, year: event.target.value })} />
+        <input type="text" name="year" onChange={({ target: { value } }) => setYear(value)} />
         <br />
-        <button onClick={() => this.setState({ ...this.state, isValid: this.isValidCar({ state: this.state.state, year: this.state.year }) })}>Validate</button>
+        <button onClick={() => setIsValid(isValidHome({ state, year }))}>Validate</button>
       </div>
     );
-  }
 }
 
 export default App;
